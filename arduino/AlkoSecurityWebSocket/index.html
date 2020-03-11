@@ -1,0 +1,30 @@
+<html>
+	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+	<div id=view>
+		Температура: {{temperature.toLocaleString()}} C
+	</div>
+	<script>
+		let view = new Vue({
+			el:'#view',
+			data:{
+				temperature:0
+			},
+			methods:{
+				updateTemperature:function(data){
+					this.temperature = data;
+				}
+			}
+		})
+		let ws = new WebSocket('ws://192.168.88.251');
+		ws.onopen = function(){
+			console.log('Connected');
+		}
+		ws.onmessage = function(msg){
+			view.updateTemperature(msg.data);
+		}
+		ws.onclose = function(evn){
+			console.log(evn);
+		}
+	</script>
+	
+<thml>
