@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">AlkoSecurityApp</string>
+    <string name="connectionSettings">Налаштування підключення</string>
+    <string name="connectionSettingsAddress">Адреса</string>
+    <string name="connectionSettingsPort">Порт</string>
+    <string name="notify_in_background">Датчик #1</string>
 </resources>
