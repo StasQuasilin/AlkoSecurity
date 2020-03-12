@@ -1,30 +1,109 @@
-<html>
+<html xmlns:v-on="http://www.w3.org/1999/xhtml">
+	<style>
+		*{
+			font-family: Courier New, monospace;
+			user-select: none;
+		}
+		.title{
+			width: 100%;
+			text-align: center;
+		}
+		.wrapper{
+			width: 100%;
+			height: 100%;
+		}
+		.view{
+			margin: auto;
+			border: solid gray 1pt;
+			width: 440px;
+			height: 100%;
+			padding: 0 4pt;
+		}
+		.sensor-row{
+			margin: 4pt 0;
+			border: solid gray 1pt;
+			padding: 8pt 4pt;
+		}
+	</style>
 	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-	<div id=view>
-		Температура: {{temperature.toLocaleString()}} C
+	<div class="wrapper">
+		<div id=view class="view">
+			<h3 class="title">AlkoSecurity 1.0</h3>
+			<div v-if="!connected">
+				<input v-model="address" autocomplete="off">
+				<button v-if="!connect" v-on:click="connectTo">
+					Коннект
+				</button>
+				<button v-else>
+					...
+				</button>
+				<p style="color: gray; font-style: italic">
+					Для початку роботи введи ІР дівайса та жмакай кнопку 'Коннект'
+				</p>
+			</div>
+			<div v-else style="color: gray; font-size: 10pt">
+				З'єднано з {{address}}
+			</div>
+			<div>
+				<div class="sensor-row" v-for="item in temperature">
+					Датчик {{item.id}}: <b>{{item.temperature.toLocaleString()}} &#176;C</b>
+				</div>
+			</div>
+		</div>
 	</div>
 	<script>
 		let view = new Vue({
 			el:'#view',
 			data:{
-				temperature:0
+				address:'',
+				temperature:[],
+				connected:false,
+				connect:false
+			},
+			mounted:function(){
+				this.loadAddress();
 			},
 			methods:{
+				connectTo:function(){
+					if (this.address) {
+						this.saveAddress();
+						this.connect = true;
+						const self = this;
+						console.log('Connect to ' + this.address);
+						let ws = new WebSocket('ws://' + this.address);
+						ws.onopen = function () {
+							console.log('Connected');
+							self.connected = true;
+							self.connect = false;
+						};
+						ws.onmessage = function (msg) {
+							self.updateTemperature(msg.data);
+						};
+						ws.onclose = function (evn) {
+							console.log(evn);
+							self.connected = false;
+						};
+						ws.onerror = function (err) {
+							console.log(err);
+						}
+					}
+				},
+				saveAddress:function(){
+					localStorage.setItem('address', this.address);
+				},
+				loadAddress:function(){
+					let address = localStorage.getItem('address');
+					if (address){
+						console.log('Load address: ' + address);
+						this.address = address;
+					} else {
+						console.log('No saved address');
+					}
+				},
 				updateTemperature:function(data){
-					this.temperature = data;
+					this.temperature = JSON.parse(data);
 				}
 			}
 		})
-		let ws = new WebSocket('ws://192.168.88.251');
-		ws.onopen = function(){
-			console.log('Connected');
-		}
-		ws.onmessage = function(msg){
-			view.updateTemperature(msg.data);
-		}
-		ws.onclose = function(evn){
-			console.log(evn);
-		}
 	</script>
-	
-<thml>
+</html>
