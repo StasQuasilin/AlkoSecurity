@@ -58,7 +58,8 @@
 				address:'',
 				temperature:[],
 				connected:false,
-				connect:false
+				connect:false,
+				error:''
 			},
 			mounted:function(){
 				this.loadAddress();
@@ -70,21 +71,27 @@
 						this.connect = true;
 						const self = this;
 						console.log('Connect to ' + this.address);
-						let ws = new WebSocket('ws://' + this.address);
-						ws.onopen = function () {
-							console.log('Connected');
-							self.connected = true;
-							self.connect = false;
-						};
-						ws.onmessage = function (msg) {
-							self.updateTemperature(msg.data);
-						};
-						ws.onclose = function (evn) {
-							console.log(evn);
-							self.connected = false;
-						};
-						ws.onerror = function (err) {
-							console.log(err);
+						try {
+							let ws = new WebSocket('ws://' + this.address);
+							ws.onopen = function () {
+								console.log('Connected');
+								self.connected = true;
+								self.connect = false;
+							};
+							ws.onmessage = function (msg) {
+								self.updateTemperature(msg.data);
+							};
+							ws.onclose = function (evn) {
+								console.log(evn);
+								self.connected = false;
+								self.connect = false;
+								self.temperature = [];
+							};
+							ws.onerror = function (err) {
+								console.log(err);
+							}
+						} catch (e){
+							e.printStackTrace();
 						}
 					}
 				},
