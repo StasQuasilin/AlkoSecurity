@@ -1,3 +1,27 @@
+
+
+
+
+
+void initWebSocket(){
+  Serial.println("Connecting");
+  WiFiManager wifiManager;
+  wifiManager.setDebugOutput(true);
+  wifiManager.autoConnect(ssid, password);
+  
+  while ( WiFi.status() != WL_CONNECTED ) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("Connected!");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  webSocket.begin();
+  webSocket.onEvent(onWebSocketEvent);
+}
+
 void onWebSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
  
   // Figure out the type of WebSocket event
@@ -7,7 +31,7 @@ void onWebSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t leng
     case WStype_DISCONNECTED:
       Serial.printf("[%u] Disconnected!\n", num);
       clients[num] = noClient;
-      printClients();
+      //printClients();
       break;
  
     // New client has connected
@@ -18,7 +42,7 @@ void onWebSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t leng
           Serial.printf("[%u] Connection from ", num);
           Serial.println(ip.toString());
           clients[num] = num;
-          printClients();
+          //printClients();
         }
       }
       break;
@@ -38,5 +62,14 @@ void onWebSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t leng
     case WStype_FRAGMENT_FIN:
     default:
       break;
+  }
+}
+
+void dataSend(String data){
+  for (int i = 0; i < 4; i++){
+      uint8_t client = clients[i];
+      if (client != noClient){
+          webSocket.sendTXT(client, data);
+      }
   }
 }

@@ -24,6 +24,14 @@
 			border: solid gray 1pt;
 			padding: 8pt 4pt;
 		}
+		.sensor{
+
+		}
+		.temperature{
+			font-size: 32pt;
+			width: 100%;
+			text-align: right;
+		}
 	</style>
 	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 	<div class="wrapper">
@@ -46,7 +54,12 @@
 			</div>
 			<div>
 				<div class="sensor-row" v-for="item in temperature">
-					Датчик {{item.id}}: <b>{{item.temperature.toLocaleString()}} &#176;C</b>
+					<div class="sensor">
+						Датчик {{item.rom}}
+					</div>
+					<div class="temperature">
+						<b>{{item.temperature.toLocaleString()}} &#176;C</b>
+					</div>
 				</div>
 			</div>
 		</div>
