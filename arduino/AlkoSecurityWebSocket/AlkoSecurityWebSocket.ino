@@ -1,10 +1,15 @@
 #include <ArduinoJson.h>
+#include <SPI.h>
+#include <Wire.h>
+#include <OneWire.h>
 #include <WiFiManager.h>
 #include <WebSocketsServer.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
-#define AC_SSID "home23"
+#define AC_SSID "BestСамогон"
 #define AC_PASS "07022014"
-#define ONE_WIRE_BUS D2
+#define ONE_WIRE_BUS D3
 
 const char* ssid = AC_SSID;
 const char* password = AC_PASS;
@@ -13,28 +18,18 @@ WebSocketsServer webSocket = WebSocketsServer(80);
 
 const uint8_t noClient = -1;
 uint8_t clients[4];
+long rssi;
+String address;
 
 void setup() {
-
-  Serial.begin(115200);
+  //Serial.begin(9600);
+  initDisplay();
   initWebSocket();
-
-  /*
-  for (int i = 0; i < 4; i++){
-    clients[i] = noClient;
-  }
   
-  */
 }
 
 void loop() {
-  webSocket.loop();
+  updateRSSI();
   sensorLoop1();
+  webSocket.loop();
 }
-/*
-void printClients(){
-  for (int i = 0; i < 4; i++){
-      Serial.printf("\t--> [%u]\n", clients[i]);
-  }
-}
-*/

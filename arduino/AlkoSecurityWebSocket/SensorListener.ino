@@ -1,8 +1,9 @@
-#include <OneWire.h>
+
 
 OneWire ds(ONE_WIRE_BUS);
 
 DynamicJsonDocument doc(1024);
+uint8_t sensorsCount = 0;
 
 void sensorLoop1(){
   
@@ -17,8 +18,9 @@ void sensorLoop1(){
   if ( !ds.search(addr)) {
     String data;
     serializeJson(doc, data);
-    Serial.println(data);
     dataSend(data);
+    drawData(sensorsCount, doc);
+    sensorsCount = 0;
     doc.clear();
     ds.reset_search();
     delay(250);
@@ -38,18 +40,20 @@ void sensorLoop1(){
     return;
   }
 
+  /*
+  String family;
   // первый байт определяет чип
   switch (addr[0]) {
     case 0x10:
-      obj["chip"] = "DS18S20";
+      family = "DS18S20";
       type_s = 1;
       break;
     case 0x28:
-      obj["chip"] = "DS18B20";
+     family = "DS18B20";
       type_s = 0;
       break;
     case 0x22:
-      obj["chip"] = "DS1822";    
+      family = "DS1822";    
       type_s = 0;
       break;      
     default:
@@ -57,10 +61,12 @@ void sensorLoop1(){
       return;
   }
 
+    obj["chip"] = family;
+*/
   ds.reset();
   ds.select(addr);
   ds.write(0x44); // начинаем преобразование, используя ds.write(0x44,1) с "паразитным" питанием
-  delay(1000); // 750 может быть достаточно, а может быть и не хватит
+  delay(900); // 750 может быть достаточно, а может быть и не хватит
 
   // мы могли бы использовать тут ds.depower(), но reset позаботится об этом
   present = ds.reset();
@@ -94,5 +100,7 @@ void sensorLoop1(){
   }
 
   celsius = (float)raw / 16.0;
+  //Serial.println("Rom: " + rom + ", family: " + family + ": " + celsius + " ℃");
   obj["temperature"] = celsius;
+  sensorsCount++;
 }

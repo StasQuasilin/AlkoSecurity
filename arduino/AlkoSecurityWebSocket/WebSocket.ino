@@ -1,25 +1,26 @@
-
-
-
-
-
 void initWebSocket(){
-  Serial.println("Connecting");
+  //String s = "Connecting";
+  //writeText(s);
   WiFiManager wifiManager;
-  wifiManager.setDebugOutput(true);
-  wifiManager.autoConnect(ssid, password);
+  //wifiManager.setDebugOutput(true);
+  //wifiManager.autoConnect(ssid, password);
+  wifiManager.autoConnect(ssid);
   
   while ( WiFi.status() != WL_CONNECTED ) {
-    delay(500);
-    Serial.print(".");
+    delay(300);
+    //s = s + " .";
+    //writeText(s);
   }
 
-  Serial.println("Connected!");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-
+  //writeText("Connected!");
+  
+  address = WiFi.localIP().toString();
   webSocket.begin();
   webSocket.onEvent(onWebSocketEvent);
+}
+
+void updateRSSI(){
+  rssi = WiFi.RSSI();
 }
 
 void onWebSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
@@ -29,7 +30,7 @@ void onWebSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t leng
  
     // Client has disconnected
     case WStype_DISCONNECTED:
-      Serial.printf("[%u] Disconnected!\n", num);
+      //Serial.printf("[%u] Disconnected!\n", num);
       clients[num] = noClient;
       //printClients();
       break;
@@ -39,8 +40,8 @@ void onWebSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t leng
       {
         if (num < 4){
           IPAddress ip = webSocket.remoteIP(num);
-          Serial.printf("[%u] Connection from ", num);
-          Serial.println(ip.toString());
+          //Serial.printf("[%u] Connection from ", num);
+          //Serial.println(ip.toString());
           clients[num] = num;
           //printClients();
         }
@@ -49,7 +50,7 @@ void onWebSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t leng
  
     // Echo text message back to client
     case WStype_TEXT:
-      Serial.printf("[%u] Text: %s\n", num, payload);
+      //Serial.printf("[%u] Text: %s\n", num, payload);
       webSocket.sendTXT(num, payload);
       break;
  
